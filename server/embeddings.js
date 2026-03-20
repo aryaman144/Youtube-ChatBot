@@ -30,6 +30,7 @@ export const addYTVideoToVectorStore = async(videoData) => {
         pageContent: transcript,
         metadata: { video_id}
     })];
+    
     // Split video into chunks
     const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 1000,
@@ -39,7 +40,5 @@ export const addYTVideoToVectorStore = async(videoData) => {
     const chunks = await splitter.splitDocuments(docs);
 
     //Embed the chunks
-
-
     await vectorStore.addDocuments(chunks);
 }
