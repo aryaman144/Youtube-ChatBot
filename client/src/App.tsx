@@ -7,11 +7,16 @@ interface Message {
   isUser: boolean;
 }
 
+const suggestedPrompts = [
+  "Summarize this YouTube video",
+  "What are the key points from this video?", 
+  "Explain the concepts in this video"
+];
+
 function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [threadId, setThreadId] = useState<number>(Date.now());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -56,7 +61,7 @@ function App() {
         },
         body: JSON.stringify({
           query: userMessage.text,
-          thread_id: threadId,
+          thread_id: Date.now(),
           video_id: "JljlsOJmlCA"
         }),
       });
@@ -89,92 +94,94 @@ function App() {
     }
   };
 
-  const resetChat = () => {
-    setMessages([]);
-    setThreadId(Date.now());
+  const handleSuggestedPrompt = (prompt: string) => {
+    setInputText(prompt);
   };
 
   return (
-    <div className='chat-container'>
-      <header className='chat-header'>
-        <h1>AI Chat</h1>
-        <button className='reset-button' onClick={resetChat}>
-          <svg
-            width='16'
-            height='16'
-            viewBox='0 0 16 16'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <path
-              d='M8 3V1L4 5L8 9V7C10.21 7 12 8.79 12 11C12 13.21 10.21 15 8 15C5.79 15 4 13.21 4 11H2C2 14.31 4.69 17 8 17C11.31 17 14 14.31 14 11C14 7.69 11.31 5 8 5V3Z'
-              fill='currentColor'
-            />
-          </svg>
-          New Chat
-        </button>
+    <div className='app-container'>
+      {/* Header */}
+      <header className='app-header'>
+        <a href="https://www.youtube.com" target="_blank" rel="noopener noreferrer" className='upgrade-btn'>
+          YouTube
+        </a>
       </header>
 
-      <div className='messages-container'>
+      {/* Main Content */}
+      <main className='main-content'>
         {messages.length === 0 ? (
-          <div className='empty-state'>
-            <p>Start your conversation with the AI</p>
+          <div className='welcome-section'>
+            <h1 className='welcome-title'>Good to See You! How Can I Help with YouTube?</h1>
+            <p className='welcome-subtitle'>Share any YouTube video and I'll analyze it for you. Ask questions about content, get summaries, or explore topics.</p>
+            
+            {/* Suggested Prompts */}
+            <div className='suggested-prompts'>
+              {suggestedPrompts.map((prompt, index) => (
+                <button
+                  key={index}
+                  className='prompt-btn'
+                  onClick={() => handleSuggestedPrompt(prompt)}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`message ${
-                message.isUser ? 'user-message' : 'ai-message'
-              }`}
-            >
-              <div className='message-avatar'>
-                {message.isUser ? 'You' : 'AI'}
+          <div className='messages-container'>
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`message ${
+                  message.isUser ? 'user-message' : 'ai-message'
+                }`}
+              >
+                <div className='message-content'>{message.text}</div>
               </div>
-              <div className='message-content'>{message.text}</div>
-            </div>
-          ))
-        )}
-        {isLoading && (
-          <div className='message ai-message'>
-            <div className='message-avatar'>AI</div>
-            <div className='message-content loading'>
-              <span className='dot'></span>
-              <span className='dot'></span>
-              <span className='dot'></span>
-            </div>
+            ))}
+            {isLoading && (
+              <div className='message ai-message'>
+                <div className='message-content loading'>
+                  <span className='dot'></span>
+                  <span className='dot'></span>
+                  <span className='dot'></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
           </div>
         )}
-        <div ref={messagesEndRef} />
-      </div>
+      </main>
 
-      <div className='input-container'>
-        <textarea
-          value={inputText}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder='Type your message...'
-          disabled={isLoading}
-          rows={1}
-        />
-        <button
-          className='send-button'
-          onClick={sendMessage}
-          disabled={inputText.trim() === '' || isLoading}
-        >
-          <svg
-            width='24'
-            height='24'
-            viewBox='0 0 24 24'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
+      {/* Input Section */}
+      <div className='input-section'>
+        <div className='input-container'>
+          <button className='input-icon-btn plus-btn'>
+            <svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d='M10 5V15M5 10H15' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'/>
+            </svg>
+          </button>
+          
+          <textarea
+            value={inputText}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder='Ask anything...'
+            disabled={isLoading}
+            rows={1}
+            className='message-input'
+          />
+          
+          <button 
+            className='input-icon-btn send-btn'
+            onClick={sendMessage}
+            disabled={inputText.trim() === '' || isLoading}
           >
-            <path
-              d='M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z'
-              fill='currentColor'
-            />
-          </svg>
-        </button>
+            <svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d='M10 5L10 15M15 10L10 5L5 10' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
